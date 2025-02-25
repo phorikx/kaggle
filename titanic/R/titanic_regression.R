@@ -4,44 +4,21 @@ library(readr)
 library(mice)
 library(purrr)
 
-data_map <- "/home/paul/projects/kaggle/titanic/data"
-output_map <- "/home/paul/projects/kaggle/titanic/output"
+basis_map <- "/home/paul/projects/kaggle/titanic"
+data_map <- file.path(basis_map, "data")
+output_map <- file.path(basis_map, "output")
+functie_map <- file.path(basis_map, "R", "functies")
+list.files(path = functie_map, pattern = "\\.[Rr]$", full.names = TRUE) |> walk(source)
+
 titanic_train <- read_csv(file.path(data_map, "train.csv")) 
 titanic_test <- read_csv(file.path(data_map, "test.csv"))
 
-titanic_train <- titanic_train |>
-  mutate(Sex = factor(Sex, levels = c("male", "female")),
-    Survived = factor(Survived, levels = c(0, 1), labels = c("Did not survive", "Did survive")),
-    Embarked = factor(Embarked, levels = c("C", "Q","S"), labels = c("Cherbourg", "Queenstown", "Southampton")),
-    Pclass = factor(Pclass, levels = c(1, 2, 3), labels = c("Upper", "Middle", "Lower"))
-  )
-imp <- mice(titanic_train, method = "norm")
-titanice_train <- complete(imp)
-
-titanic_test <- titanic_test |>
-  mutate(Sex = factor(Sex, levels = c("male", "female")),
-    Embarked = factor(Embarked, levels = c("C", "Q","S"), labels = c("Cherbourg", "Queenstown", "Southampton")),
-    Pclass = factor(Pclass, levels = c(1, 2, 3), labels = c("Upper", "Middle", "Lower"))
-  )
-imp <- mice(titanic_test, method = "norm")
-titanic_test <- complete(imp)
-
-evaluate_model <- function(data, generate_model, pred, eval){
-  1:10 |> sapply(function(x) {
-    test_part <- sample(x = 1:nrow(data), size = floor(0.25*nrow(data)), replace = FALSE)
-    data_test <- data |> slice(test_part)
-    data_train <- data |> slice(-test_part)
-
-    model <- generate_model(data_train)
-
-    predicted <- pred(model, data_test)
-
-    score <- eval(predicted, data_test)
-  }) |> mean()
-}
+titanic_train <- modify_titanic(titanic_train)
+titanic_test <- modify_titanic(titanic_test, is_train = FALSE )
 
 gen_model <- function(data_train) {
-  glm(Survived ~ Pclass + Sex + SibSp, data = data_train, family = "binomial")
+  glm(Survived ~ Pclass + Sex + FareBin + IsAlone + FamilySize + Title,
+    data = data_train, family = "binomial")
 }
 
 pred <- function(model, data_test) {
@@ -58,8 +35,11 @@ eval <- function(predicted, data_test){
 
 evaluate_model(titanic_train, gen_model, pred, eval)
 
+model <- gen_model(titanic_train)
+prediction <- pred(model, titanic_test)
+
 output <- tibble(PassengerId = titanic_test$PassengerId, Survived = prediction) |> 
   mutate(Survived = round(Survived))
 head(output)
 
-write.csv(output, file.path(output_map, "submission.csv"), row.names = FALSE, quote = FALSE)
+write.csv(output, file.path(output_map, "submission_regression.csv"), row.names = FALSE, quote = FALSE)
