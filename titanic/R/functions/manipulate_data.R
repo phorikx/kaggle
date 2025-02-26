@@ -1,10 +1,10 @@
-modify_titanic <- function(data, is_train = FALSE) {
+modify_titanic <- function(data, is_train = TRUE) {
   rare_titles <- c('Dona', 'Lady', 'the Countess','Capt', 'Col', 'Don', 
                   'Dr', 'Major', 'Rev', 'Sir', 'Jonkheer')
 
   data_survived <- if (is_train) {
       data |> mutate(
-        Survived = factor(Survived, levels = c(0, 1), labels = c("Did not survive", "Did survive")),
+        Survived = factor(Survived, levels = c(0, 1), labels = c("DidNotSurvive", "DidSurvive")),
       )
     } else {
       data

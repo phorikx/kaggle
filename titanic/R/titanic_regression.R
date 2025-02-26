@@ -28,7 +28,7 @@ pred <- function(model, data_test) {
 eval <- function(predicted, data_test){
   data_test <- data_test |>
     mutate(predicted = predicted) |>
-    mutate(eval = abs(as.integer(Survived) - 1 - predicted))
+    mutate(eval = abs(as.integer(Survived) - 1 - round(predicted)))
 
   mean(data_test$eval, na.rm = TRUE)
 }
