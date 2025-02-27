@@ -17,7 +17,7 @@ titanic_train <- modify_titanic(titanic_train)
 titanic_test <- modify_titanic(titanic_test, is_train = FALSE )
 
 gen_model <- function(data_train) {
-  glm(Survived ~ Pclass + Sex + FareBin + IsAlone + FamilySize + Title,
+  glm(Survived ~ Pclass + Sex + IsAlone + FamilySize + Title,
     data = data_train, family = "binomial")
 }
 

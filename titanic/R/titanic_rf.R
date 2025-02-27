@@ -17,7 +17,7 @@ titanic_test_file <- read_csv(file.path(data_map, "test.csv"))
 
 trim_data <- function(data, is_train = TRUE) {
   features <- c("Pclass", "Sex", "AgeBin", "FareBin",
-  "Embarked", "Title", "FamilySize", "IsAlone", "Deck")
+   "Title", "FamilySize", "IsAlone")
   features <- if (is_train) {
     c("Survived",features)
     } else {
@@ -45,7 +45,7 @@ gen_model <- function(data_train) {
     method = "rf",
     metric = "ROC",
     trControl = cv_control,
-    ntree = 500,
+    ntree = 1000,
     importance = TRUE)
 }
 
