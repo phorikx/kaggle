@@ -1,4 +1,5 @@
 library(randomForest)
+library(ggplot2)
 library(ranger)
 library(caret)
 library(dplyr)
@@ -7,6 +8,7 @@ library(readr)
 library(mice)
 library(purrr)
 
+# Basis voorbereidingen treffen - wat betreft het laden van paden, etc.
 basis_map <- "/home/paul/projects/kaggle/titanic"
 data_map <- file.path(basis_map, "data")
 output_map <- file.path(basis_map, "output")
@@ -18,7 +20,7 @@ titanic_test_file <- read_csv(file.path(data_map, "test.csv"))
 
 trim_data <- function(data, is_train = TRUE) {
   features <- c("Pclass", "Sex", "AgeBin", "FareBin",
-   "Title", "FamilySize", "IsAlone")
+   "Title", "FamilySize", "IsAlone", "FareBin", "Deck", "Embarked", "LogFare")
   features <- if (is_train) {
     c("Survived",features)
     } else {
@@ -28,6 +30,7 @@ trim_data <- function(data, is_train = TRUE) {
   data |> select(features)
 }
 
+# Data aanpassen aan 
 titanic_train <- modify_titanic(titanic_train_file) |> 
   trim_data()
 titanic_test <- modify_titanic(titanic_test_file, is_train = FALSE) |> trim_data(is_train = FALSE)
@@ -40,7 +43,7 @@ summary_function <- function(data, lev = NULL, model = NULL) {
 tune_model <- function(data, search, summary_function = twoClassSummary) {
   cv_control <- trainControl(
     method = "cv",
-    number = 5,
+    number = 10,
     verboseIter = FALSE,
     classProbs = TRUE,
     summaryFunction = summary_function,
@@ -48,13 +51,16 @@ tune_model <- function(data, search, summary_function = twoClassSummary) {
     returnResamp = "all"
   )
 
-  train(Survived ~ ., 
+  train(Survived ~ . + Sex:Pclass + AgeBin:Pclass + FamilySize:Sex , 
     data = data,
     method = "ranger",
     metric = "ROC",
     tuneGrid = search,
     trControl = cv_control,
-    importance = "impurity")
+    importance = "impurity", 
+    num.trees = 1000,
+    max.depth = 10,
+    sample.fraction = 0.8)
 
 }
 

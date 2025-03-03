@@ -22,6 +22,7 @@ modify_titanic <- function(data, is_train = TRUE) {
       Pclass = factor(Pclass, levels = c(1, 2, 3), labels = c("Upper", "Middle", "Lower")),
       FamilySize = 1 + SibSp + Parch,
       IsAlone = ifelse(FamilySize == 1, "Alone", "NotAlone") |> as.factor(),
+      LogFare = ifelse(is.na(Fare) | Fare == 0, 0, log(Fare))
     )
 
   imp <- mice(data_tbi, method = "norm")
