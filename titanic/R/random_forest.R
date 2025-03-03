@@ -58,23 +58,24 @@ tune_model <- function(data, search, summary_function = twoClassSummary) {
     tuneGrid = search,
     trControl = cv_control,
     importance = "impurity", 
-    num.trees = 1000,
+    num.trees = 2000,
     max.depth = 10,
-    sample.fraction = 0.8)
+    sample.fraction = 0.7)
 
 }
 
 # Evaluate several different hyperparameters
 p <- ncol(titanic_train) - 1
 search_grid <- expand.grid(
-  mtry = 1:4,
+  mtry = 2:4,
   splitrule = c("gini", "extratrees"),
-  min.node.size = 1:5
+  min.node.size = c(1,2,5,10,20)
 )
 tuned <- tune_model(titanic_train, search = search_grid, summary_function = summary_function)
 best_model <- tuned$finalModel
 titanic_test$Survived <- factor(NA, levels = levels(titanic_train$Survived))
 prediction_best <- predict(tuned, newdata = titanic_test)
+prediction_random_forest_prob <- predict(tuned, newdata = titanic_test, type = "prob")
 prediction_best
 
 # Beste model zoals eerder gemaakt wegschrijven
@@ -99,8 +100,9 @@ gen_model <- function(data_train) {
     max_depth = 5,
     trControl = cv_control,
     ntree = 500,
-    mtry = 2,
-    min.node.size = 1,
+    num.trees = 2000,
+    mtry = 3,
+    min.node.size = 10,
     splitrule = "gini",
     importance = "impurity")
 }
