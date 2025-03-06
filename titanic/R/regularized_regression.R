@@ -17,15 +17,15 @@ titanic_test_file <- read_csv(file.path(data_map, "test.csv"))
 titanic_train <- modify_titanic(titanic_train_file)
 titanic_test <- modify_titanic(titanic_test_file, is_train = FALSE )
 
-x <- model.matrix(Survived ~ Pclass + Sex + LogFare + IsAlone + FamilySize + Title + AgeBin + AgeBin*Sex + Pclass * Sex - 1, data = titanic_train)
+x <- model.matrix(Survived ~ Pclass + Sex + FarePerPerson + Mother + LogFare + IsAlone + FamilySize + Title + AgeBin + AgeBin*Sex + Pclass * Sex - 1, data = titanic_train)
 y <- as.numeric(titanic_train$Survived) - 1
 cv_fit <- cv.glmnet(x, y, family = "binomial", alpha = 0.5)
 plot(cv_fit)
 best_lambda <- cv_fit$lambda.min
-
-x_test <- model.matrix(~ Pclass + Sex + LogFare + IsAlone + FamilySize + Title + AgeBin + AgeBin*Sex + Pclass * Sex - 1, data = titanic_train)
+x_test <- model.matrix(~ Pclass + Sex + FarePerPerson + Mother + LogFare + IsAlone + FamilySize + Title + AgeBin + AgeBin*Sex + Pclass * Sex - 1, data = titanic_test)
 
 prediction <- predict(cv_fit, newx = x_test, s = best_lambda, type = "response")
+prediction_reg_reg_prob <- predict(cv_fit, newx = x_test, s = best_lambda, type = "response")
 
 output <- tibble(PassengerId = titanic_test$PassengerId, Survived = prediction) |> 
   mutate(Survived = round(Survived))

@@ -20,7 +20,9 @@ titanic_test_file <- read_csv(file.path(data_map, "test.csv"))
 
 trim_data <- function(data, is_train = TRUE) {
   features <- c("Pclass", "Sex", "AgeBin", "FareBin",
-   "Title", "FamilySize", "IsAlone", "FareBin", "Deck", "Embarked", "LogFare")
+   "Title", "FamilySize", "IsAlone", "FareBin", "Deck", "Embarked", 
+    "LogFare", "Mother", "YoungMiss", "FarePerPerson", "NameLetter",
+  "HasSibling", "HasParent", "LargeFamily", "SmallFamily")
   features <- if (is_train) {
     c("Survived",features)
     } else {
@@ -51,15 +53,15 @@ tune_model <- function(data, search, summary_function = twoClassSummary) {
     returnResamp = "all"
   )
 
-  train(Survived ~ . + Sex:Pclass + AgeBin:Pclass + FamilySize:Sex , 
+  train(Survived ~ . + Sex:Pclass + AgeBin:Pclass + FamilySize:Sex + Sex:FarePerPerson + AgeBin:Sex, 
     data = data,
     method = "ranger",
     metric = "ROC",
     tuneGrid = search,
     trControl = cv_control,
     importance = "impurity", 
-    num.trees = 2000,
-    max.depth = 10,
+    num.trees = 1000,
+    max.depth = NULL,
     sample.fraction = 0.7)
 
 }
@@ -67,9 +69,9 @@ tune_model <- function(data, search, summary_function = twoClassSummary) {
 # Evaluate several different hyperparameters
 p <- ncol(titanic_train) - 1
 search_grid <- expand.grid(
-  mtry = 2:4,
+  mtry = 3:8,
   splitrule = c("gini", "extratrees"),
-  min.node.size = c(1,2,5,10,20)
+  min.node.size = c(1,3,5,710)
 )
 tuned <- tune_model(titanic_train, search = search_grid, summary_function = summary_function)
 best_model <- tuned$finalModel
@@ -83,59 +85,3 @@ output <- tibble(PassengerId = titanic_test_file$PassengerId, Survived = as.inte
 head(output)
 
 write.csv(output, file.path(output_map, "submission_random_forest.csv"), row.names = FALSE, quote = FALSE)
-
-# Custom model proberen
-gen_model <- function(data_train) {
-  cv_control <- trainControl(
-    method = "cv",
-    number = 5,
-    verboseIter = FALSE,
-    classProbs = TRUE,
-    summaryFunction = summary_function
-  )
-  train(Survived ~ ., 
-    data = data_train,
-    method = "ranger",
-    metric = "ROC",
-    max_depth = 5,
-    trControl = cv_control,
-    ntree = 500,
-    num.trees = 2000,
-    mtry = 3,
-    min.node.size = 10,
-    splitrule = "gini",
-    importance = "impurity")
-}
-
-pred <- function(model, data_test) {
-  predict(model, data_test)
-}
-
-pred_prob <- function(model, data_test) {
-  predict(model, data_test, type = "prob")
-}
-
-eval <- function(predicted, data_test){
-  data_test <- data_test |>
-    mutate(predicted = predicted |> as.integer()) |>
-    mutate(eval = abs(as.integer(Survived) - predicted))
-
-  mean(data_test$eval, na.rm = TRUE)
-}
-
-evaluate_model(titanic_train, gen_model, pred, eval)
-
-
-model <- gen_model(titanic_train)
-var_importance <- varImp(model, scale = TRUE)
-print(var_importance)
-
-prediction <- pred(model, titanic_test)
-prediction_best <- pred(best_model, titanic_test)
-
-# Zelf gemaakte model wegschrijven
-output <- tibble(PassengerId = titanic_test_file$PassengerId, Survived = as.integer(prediction) - 1)
-head(output)
-
-write.csv(output, file.path(output_map, "submission_random_forest.csv"), row.names = FALSE, quote = FALSE)
-
