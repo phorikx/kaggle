@@ -43,12 +43,11 @@ gradient_boosting_model <- train_gradient_boosting(titanic_train)
 glm_model <- train_glm(titanic_train)
 
 # Make predictions 
-rf_preds <- predict(random_forest_model, data = titanic_test, type = "response")$DidSurvive 
+rf_preds <- predict(random_forest_model, newdata = titanic_test, type = "prob")$DidSurvive 
 gbm_preds <- predict(gradient_boosting_model, data = titanic_test, type = "prob")$DidSurvive
 glm_preds <- predict(glm_model, data = titanic_test, type = "prob")$DidSurvive
 
-
-optimal_weights <- find_optimal_weights()
+optimal_weights <- find_optimal_weights(train_data = titanic_train)
 
 ensemble_preds <- optimal_weights[1] * rf_preds + optimal_weights[2] * gbm_preds + optimal_weights[3]* glm_preds
 

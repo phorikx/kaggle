@@ -1,4 +1,4 @@
-find_optimal_weights <- function() {
+find_optimal_weights <- function(train_data) {
   # Create empty dataframes for out-of-fold predictions
   train_folds <- createFolds(train_data$Survived, k = 5)
   oof_rf <- numeric(nrow(train_data))
@@ -13,14 +13,14 @@ find_optimal_weights <- function() {
     valid_fold <- train_data[fold_idx, ]
     
     # Train models
-    rf_fold <- train_ranger(train_fold)
-    gbm_fold <- train_gbm(train_fold)
-    glmnet_fold <- train_glmnet(train_fold)
+    rf_fold <- train_random_forest(train_fold)
+    gbm_fold <- train_gradient_boosting(train_fold)
+    glmnet_fold <- train_glm(train_fold)
     
     # Store predictions
     oof_rf[fold_idx] <- predict(rf_fold, newdata = valid_fold, type = "prob")$DidSurvive
-    oof_gbm[fold_idx] <- predict(gbm_fold, newdata = valid_fold, type = "prob")$DidSurvive
-    oof_glmnet[fold_idx] <- predict(glmnet_fold, newdata = valid_fold, type = "prob")$DidSurvive
+    oof_gbm[fold_idx] <- predict(gbm_fold, data = valid_fold, type = "prob")$DidSurvive
+    oof_glmnet[fold_idx] <- predict(glmnet_fold, data = valid_fold, type = "prob")$DidSurvive
   }
   
   # Prepare data for weight optimization
