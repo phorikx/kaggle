@@ -55,4 +55,4 @@ ensemble_preds <- optimal_weights[1] * rf_preds + optimal_weights[2] * gbm_preds
 output <- tibble(PassengerId = titanic_test_file$PassengerId, Survived = round(ensemble_preds))
 head(output)
 
-write.csv(output, file.path(output_map, "submission_random_forest.csv"), row.names = FALSE, quote = FALSE)
+write.csv(output, file.path(output_map, "submission_meta_model.csv"), row.names = FALSE, quote = FALSE)
