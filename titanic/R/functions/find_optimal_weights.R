@@ -41,8 +41,8 @@ find_optimal_weights <- function(train_data) {
   
   # Create weight grid
   weights_grid <- expand.grid(
-    w_rf = seq(0.0, 1.0, by = 0.1),
-    w_gbm = seq(0.0, 1.0, by = 0.1)
+    w_rf = seq(0.15, 0.7, by = 0.05),
+    w_gbm = seq(0.15, 0.7, by = 0.05)
   ) |> filter(w_rf + w_gbm <= 1.0)
   weights_grid$w_glmnet <- 1 - (weights_grid$w_rf + weights_grid$w_gbm)
   

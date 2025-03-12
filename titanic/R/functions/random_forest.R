@@ -1,7 +1,7 @@
 train_random_forest <- function(titanic_train) {
   p <- ncol(titanic_train) - 1
   search_grid <- expand.grid(
-    mtry = 1:8,
+    mtry = seq(floor(sqrt(p)), p/2, length.out = 8),
     splitrule = c("gini", "extratrees"),
     min.node.size = c(1,3,5,7,10)
   )
