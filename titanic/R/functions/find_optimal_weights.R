@@ -19,20 +19,21 @@ find_optimal_weights <- function(train_data) {
     valid_fold <- train_data[fold_idx, ]
     
     # Train models
+    # 
     rf_fold <- train_random_forest(train_fold)
     gbm_fold <- train_gradient_boosting(train_fold)
     glmnet_fold <- train_glm(train_fold)
     
     # Store predictions
-    real_responses[[i]] <- train_data[fold_idx,]$DidSurvive
+    real_responses[[i]] <- as.numeric(train_data[fold_idx,]$Survived) -1
     oof_rf[[i]] <- predict(rf_fold, newdata = valid_fold, type = "prob")$DidSurvive
     oof_gbm[[i]] <- predict(gbm_fold, data = valid_fold, type = "prob")$DidSurvive
     oof_glmnet[[i]]<- predict(glmnet_fold, data = valid_fold, type = "prob")$DidSurvive
   }
-  real_responses <- unlist(real_responses)
-  oof_rf <- unlist(real_responses)
-  oof_gbm <- unlist(real_responses)
-  oof_glmnet <- unlist(real_responses)
+  real_responses_vec <- unlist(real_responses)
+  oof_rf_vec <- unlist(oof_rf)
+  oof_gbm_vec<- unlist(oof_gbm)
+  oof_glmnet_vec <- unlist(oof_glmnet)
 
   
   # Prepare data for weight optimization
@@ -40,9 +41,9 @@ find_optimal_weights <- function(train_data) {
   
   # Create weight grid
   weights_grid <- expand.grid(
-    w_rf = seq(0.1, 0.8, by = 0.1),
-    w_gbm = seq(0.1, 0.8, by = 0.1)
-  ) |> filter(w_rf + w_gbm <= 0.9)
+    w_rf = seq(0.0, 1.0, by = 0.1),
+    w_gbm = seq(0.0, 1.0, by = 0.1)
+  ) |> filter(w_rf + w_gbm <= 1.0)
   weights_grid$w_glmnet <- 1 - (weights_grid$w_rf + weights_grid$w_gbm)
   
   # Find best weights
@@ -51,9 +52,9 @@ find_optimal_weights <- function(train_data) {
   
   for(i in 1:nrow(weights_grid)) {
     w <- as.numeric(weights_grid[i, ])
-    ensemble_preds <- w[1] * oof_rf + w[2] * oof_gbm + w[3] * oof_glmnet
+    ensemble_preds <- w[1] * oof_rf_vec + w[2] * oof_gbm_vec + w[3] * oof_glmnet_vec
     ensemble_binary <- ifelse(ensemble_preds >= 0.5, 1, 0)
-    accuracy <- mean(ensemble_binary == real_responses)
+    accuracy <- mean(ensemble_binary == real_responses_vec)
     
     if(accuracy > best_accuracy) {
       best_accuracy <- accuracy
