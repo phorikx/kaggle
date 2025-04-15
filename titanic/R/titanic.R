@@ -41,11 +41,14 @@ titanic_test <- modify_titanic(titanic_test_file, is_train = FALSE) |> trim_data
 random_forest_model <- train_random_forest(titanic_train)
 gradient_boosting_model <- train_gradient_boosting(titanic_train)
 glm_model <- train_glm(titanic_train)
+select_cols <- c("Survived", "Pclass", "Sex", "AgeBin", "FamilySize",
+"FarePerPerson", "Mother", "IsAlone", "Embarked", "Title")
+svm_model <- train_svm(titanic_train, select_cols)
 
 # Make predictions 
 rf_preds <- predict(random_forest_model, newdata = titanic_test, type = "prob")$DidSurvive 
 gbm_preds <- predict(gradient_boosting_model, newdata = titanic_test, type = "prob")$DidSurvive
-  x_test <- model.matrix( ~ Pclass + Sex + FarePerPerson + Mother + LogFare + IsAlone + FamilySize + Title + AgeBin + AgeBin*Sex + Pclass * Sex - 1, data = titanic_test)
+x_test <- model.matrix( ~ Pclass + Sex + FarePerPerson + Mother + LogFare + IsAlone + FamilySize + Title + AgeBin + AgeBin*Sex + Pclass * Sex - 1, data = titanic_test)
 glm_preds <- predict(glm_model, newdata = x_test, type = "prob")$DidSurvive
 
 optimal_weights <- find_optimal_weights(train_data = titanic_train)
