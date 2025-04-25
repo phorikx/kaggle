@@ -58,11 +58,7 @@ titanic_train <- modify_titanic(titanic_train_file) |>
 titanic_test <- modify_titanic(titanic_test_file, is_train = FALSE) |>
   trim_data(is_train = FALSE)
 
-random_forest_model <- train_random_forest(titanic_train)
-gradient_boosting_model <- train_gradient_boosting(titanic_train)
-glm_model <- train_glm(titanic_train)
 select_cols <- c(
-  "Survived",
   "Pclass",
   "Sex",
   "AgeBin",
@@ -74,6 +70,10 @@ select_cols <- c(
   "Title"
 )
 svm_model <- train_svm(titanic_train, select_cols)
+random_forest_model <- train_random_forest(titanic_train)
+gradient_boosting_model <- train_gradient_boosting(titanic_train)
+glm_model <- train_glm(titanic_train)
+
 
 # Make predictions
 rf_preds <- predict(
@@ -102,13 +102,18 @@ x_test <- model.matrix(
   data = titanic_test
 )
 glm_preds <- predict(glm_model, newdata = x_test, type = "prob")$DidSurvive
+svm_preds <- predict_svm(svm_model, new_data = titanic_test)
 
-optimal_weights <- find_optimal_weights(train_data = titanic_train)
+optimal_weights <- find_optimal_weights(
+  train_data = titanic_train,
+  svm_cols = select_cols
+)
 
 ensemble_preds <- optimal_weights[1] *
   rf_preds +
   optimal_weights[2] * gbm_preds +
-  optimal_weights[3] * glm_preds
+  optimal_weights[3] * glm_preds +
+  optimal_weights[4] * svm_preds
 
 # Beste model zoals eerder gemaakt wegschrijven
 output <- tibble(
