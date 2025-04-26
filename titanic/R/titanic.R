@@ -86,22 +86,7 @@ gbm_preds <- predict(
   newdata = titanic_test,
   type = "prob"
 )$DidSurvive
-x_test <- model.matrix(
-  ~ Pclass +
-    Sex +
-    FarePerPerson +
-    Mother +
-    LogFare +
-    IsAlone +
-    FamilySize +
-    Title +
-    AgeBin +
-    AgeBin * Sex +
-    Pclass * Sex -
-    1,
-  data = titanic_test
-)
-glm_preds <- predict(glm_model, newdata = x_test, type = "prob")$DidSurvive
+glm_preds <- predict_glm(glm_model, new_data = titanic_test)
 svm_preds <- predict_svm(svm_model, new_data = titanic_test)
 
 optimal_weights <- find_optimal_weights(
