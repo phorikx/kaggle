@@ -20,8 +20,8 @@ find_optimal_weights <- function(train_data, svm_cols = c()) {
     print(paste(i, "out of", no_of_folds, "training runs", sep = " "))
     # Split data
     fold_idx <- train_folds[[i]]
-    train_fold <- train_data[-fold_idx, ]
-    valid_fold <- train_data[fold_idx, ]
+    train_fold <- train_data[fold_idx, ]
+    valid_fold <- train_data[-fold_idx, ]
 
     # Train models
     #
@@ -60,11 +60,11 @@ find_optimal_weights <- function(train_data, svm_cols = c()) {
 
   # Create weight grid
   weights_grid <- expand.grid(
-    w_rf = seq(0.15, 0.85, by = 0.05),
-    w_gbm = seq(0.15, 0.85, by = 0.05),
-    w_glmnet = seq(0.15, 0.85, by = 0.05)
+    w_rf = seq(0.0, 1.0, by = 0.05),
+    w_gbm = seq(0.0, 1.0, by = 0.05),
+    w_glmnet = seq(0.0, 1.0, by = 0.05)
   ) |>
-    filter(w_rf + w_gbm + w_glmnet <= 0.85 & w_rf + w_gbm + w_glmnet >= 0.15)
+    filter(w_rf + w_gbm + w_glmnet <= 1.0)
 
   weights_grid$w_svm <- 1 -
     (weights_grid$w_rf + weights_grid$w_gbm + weights_grid$w_glmnet)
@@ -79,7 +79,7 @@ find_optimal_weights <- function(train_data, svm_cols = c()) {
       oof_rf_vec +
       w[2] * oof_gbm_vec +
       w[3] * oof_glmnet_vec +
-      w[4] * oof_svm
+      w[4] * oof_svm_vec
     ensemble_binary <- ifelse(ensemble_preds >= 0.5, 1, 0)
     accuracy <- mean(ensemble_binary == real_responses_vec)
 
