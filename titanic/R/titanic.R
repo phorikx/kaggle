@@ -10,8 +10,8 @@ library(readr)
 library(mice)
 library(purrr)
 
-# basis_map <- "/home/paul/projects/kaggle/titanic"
-basis_map <- "C:\\Users\\phori\\Documents\\projects\\kaggle\\titanic"
+basis_map <- "/home/paul/projects/kaggle/titanic"
+# basis_map <- "C:\\Users\\phori\\Documents\\projects\\kaggle\\titanic"
 data_map <- file.path(basis_map, "data")
 output_map <- file.path(basis_map, "output")
 functie_map <- file.path(basis_map, "R", "functions")
