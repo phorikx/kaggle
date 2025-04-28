@@ -69,9 +69,13 @@ select_cols <- c(
   "Embarked",
   "Title"
 )
+print("Training SVM model;")
 svm_model <- train_svm(titanic_train, select_cols)
+print("Training RF model;")
 random_forest_model <- train_random_forest(titanic_train)
+print("Training gradient boosting model;")
 gradient_boosting_model <- train_gradient_boosting(titanic_train)
+print("Training GLM model;")
 glm_model <- train_glm(titanic_train)
 
 

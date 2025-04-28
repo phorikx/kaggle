@@ -19,8 +19,8 @@ train_svm <- function(train_data, select_cols) {
   )
 
   svm_grid <- expand.grid(
-    sigma = c(0.01, 0.02, 0.0, 0.1),
-    C = c(0.5, 1, 2, 5, 10)
+    sigma = c(0.005, 0.01, 0.02),
+    C = c(0.1, 0.5, 1, 2)
   )
 
   svm_model <- train(

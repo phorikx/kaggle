@@ -1,14 +1,8 @@
 find_optimal_weights <- function(train_data, svm_cols = c()) {
   # Create empty dataframes for out-of-fold predictions
   train_data <- train_data |> select(-NameLetter)
-  no_of_folds <- 5
-  proportion <- 0.7
-  no_of_samples <- round(nrow(train_data) * proportion)
-  train_folds <- replicate(
-    no_of_folds,
-    sample(1:nrow(train_data), size = no_of_samples, replace = FALSE),
-    simplify = FALSE
-  )
+  no_of_folds <- 10
+  folds <- createFolds(train_data$Survived, k = no_of_folds)
   oof_rf <- replicate(no_of_folds, c())
   oof_gbm <- replicate(no_of_folds, c())
   oof_glmnet <- replicate(no_of_folds, c())
@@ -16,12 +10,12 @@ find_optimal_weights <- function(train_data, svm_cols = c()) {
   real_responses <- replicate(no_of_folds, c())
 
   # Generate out-of-fold predictions
-  for (i in seq_along(train_folds)) {
+  for (i in seq_along(folds)) {
     print(paste(i, "out of", no_of_folds, "training runs", sep = " "))
     # Split data
-    fold_idx <- train_folds[[i]]
-    train_fold <- train_data[fold_idx, ]
-    valid_fold <- train_data[-fold_idx, ]
+    fold_idx <- folds[[i]]
+    train_fold <- train_data[-fold_idx, ]
+    valid_fold <- train_data[fold_idx, ]
 
     # Train models
     #
