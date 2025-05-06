@@ -1,4 +1,5 @@
 require Explorer.DataFrame, as: DF
+require Explorer.Series
 
 defmodule Stats.Model do
   def train_model(data) do
@@ -6,6 +7,6 @@ defmodule Stats.Model do
   end
 
   def make_predictions(model, data) do
-    DF.new(a: "cat")
+    {:ok, DF.new(animal: Explorer.Series.from_list(["cat", "dog"]), weight: Explorer.Series.from_list([8, 25]))}
   end
 end
