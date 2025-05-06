@@ -11,10 +11,10 @@ defmodule TitanicElixir do
     {:ok, titanic_train} = Files.ReadData.titanic_train()
     {:ok, titanic_test} = Files.ReadData.titanic_test()
 
-    {:ok, modified_data} = Stats.FeatureEngineering.update_data(titanic_train)
+    {:ok, modified_data, values} = Stats.FeatureEngineering.update_data(titanic_train)
 
     {:ok, predictions} =
-      Stats.Model.train_model(modified_data)
+      Stats.Model.train_model(modified_data, values)
       |> Stats.Model.make_predictions(titanic_test)
 
     Files.ExportPredictions.write_predictions(predictions)

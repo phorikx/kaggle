@@ -23,8 +23,10 @@ defmodule TitanicElixir.MixProject do
   defp deps do
     [
       {:scholar, "~> 0.3.0"},
+      {:exgboost, "~> 0.5.0"},
       {:exla, ">= 0.0.0"},
-      {:explorer, "~> 0.10.0"}
+      {:explorer, "~> 0.10.0"},
+      {:nx, "~> 0.9.0"}
     ]
   end
 end
