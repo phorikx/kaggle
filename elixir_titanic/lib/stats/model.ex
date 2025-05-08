@@ -15,10 +15,15 @@ defmodule Stats.Model do
     )
   end
 
-  def make_predictions(model, data) do
-    {:ok, data_format, _} = Stats.FeatureEngineering.update_data(data)
-    {:ok,
-      EXGBoost.predict(model, data_format)
-    }
+  def make_predictions(model, data, passenger_ids) do
+    data_format = Stats.FeatureEngineering.update_dataframe(data)
+    predictions = EXGBoost.predict(model, data_format) 
+
+    predictions_nice = predictions
+      |> Nx.round() 
+      |> Nx.as_type( :s64) 
+      |> Nx.max(Nx.tensor(List.duplicate(0, Nx.size(predictions))))
+    predict_df = DF.new(PassengerId: passenger_ids, Survived: Explorer.Series.from_tensor(predictions_nice))
+    {:ok, predict_df}
   end
 end
