@@ -16,6 +16,7 @@ defmodule TitanicElixir do
     {:ok, predictions} =
       Stats.Model.train_model(modified_data, values)
       |> Stats.Model.make_predictions(titanic_test, titanic_test["PassengerId"])
+
     IO.puts("made predictions")
 
     Files.ExportPredictions.write_predictions(predictions)
