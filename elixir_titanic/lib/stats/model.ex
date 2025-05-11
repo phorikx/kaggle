@@ -9,7 +9,10 @@ defmodule Stats.Model do
       booster: :gbtree,
       tree_method: :auto,
       objective: :reg_squarederror,
-      num_boost_rounds: 100,
+      num_boost_rounds: 1000,
+      subsample: 0.8,
+      grow_policy: :lossguide,
+      max_depth: 5,
       evals: [{data, values, "training"}],
       verbose_eval: true
     )
